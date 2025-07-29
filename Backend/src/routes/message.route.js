@@ -1,4 +1,4 @@
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import express from "express";
 
 const router = express.Router();
