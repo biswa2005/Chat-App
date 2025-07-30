@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 
-import { cloudinary } from "../lib/cloudinary.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const UsersList = async (req, res) => {
   try {
@@ -53,12 +53,16 @@ export const sendMessages = async (req, res) => {
 
     const newMessage = new Message({
       senderId,
-      recieverId,
+      receiverId,
       text,
       image: imageURL,
     });
 
     await newMessage.save();
+
+    return res.status(200).json({
+      newMessage,
+    });
   } catch (error) {
     console.error("Error in sendMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
