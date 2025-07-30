@@ -21,7 +21,7 @@ export const UsersList = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   try {
-    const roomId = req.params;
+    const roomId = req.params.id;
     const currentUser = req.user._id;
     const messages = await Message.find({
       $or: [
@@ -35,6 +35,32 @@ export const getMessages = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getMessages controller : ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const sendMessages = async (req, res) => {
+  try {
+    const { text, image } = req.body;
+    const receiverId = req.params.id;
+    const senderId = req.user._id;
+
+    let imageURL;
+    if (!image) {
+      const cloudinaryResponse = cloudinary.uploader.upload(image);
+      imageURL = cloudinaryResponse.secure_url;
+    }
+
+    const newMessage = new Message({
+      senderId,
+      recieverId,
+      text,
+      image: imageURL,
+    });
+
+    await newMessage.save();
+  } catch (error) {
+    console.error("Error in sendMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
