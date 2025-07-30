@@ -23,10 +23,10 @@ export const getMessages = async (req, res) => {
   try {
     const roomId = req.params;
     const currentUser = req.user._id;
-    const messages = await Messsage.find({
+    const messages = await Message.find({
       $or: [
-        { senderId: currentUser, receiverId: roomId.id },
-        { senderId: roomId.id, receiverId: currentUser },
+        { senderId: currentUser, receiverId: roomId },
+        { senderId: roomId, receiverId: currentUser },
       ],
     });
 
