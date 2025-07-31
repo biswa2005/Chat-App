@@ -12,7 +12,6 @@ import {
 const Navbar = () => {
   return (
     <div>
-      <Eye />
     </div>
   )
 }
