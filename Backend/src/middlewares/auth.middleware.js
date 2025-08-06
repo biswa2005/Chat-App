@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
-    const token = res.cookies.jwt;
+    const token = req.cookies.jwt;
 
     if (!token) {
       return res.status(401).json({
@@ -11,14 +11,17 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
       return res.status(401).json({
         message: "Unauthorized - Invalid token",
       });
     }
 
-    const user = await User.findById(decoded.userId).select("-password");
+    // The payload is { id: userId }, not { userId: ... }
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(404).json({

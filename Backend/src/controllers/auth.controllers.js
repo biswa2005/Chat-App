@@ -30,16 +30,17 @@ export const signup = async (req, res) => {
     const hashedpassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
-      firstname,
-      lastname,
+      firstname: firstname,
+      lastname: lastname,
       email,
       password: hashedpassword,
     });
 
     if (newUser) {
-      generateToken(newUser._id, res);
       await newUser.save();
-      res.status(201).json({
+      generateToken(newUser._id, res);
+
+      return res.status(201).json({
         _id: newUser._id,
         firstname: newUser.firstname,
         lastname: newUser.lastname,
@@ -47,7 +48,7 @@ export const signup = async (req, res) => {
         profilePic: newUser.profilePic,
       });
     } else {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Invalid User Data",
       });
     }
@@ -125,5 +126,14 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.log("Error in updateProfile controller", error.message);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const checkAuth = (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
