@@ -2,6 +2,8 @@ import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { sendEmail } from "../lib/EmailUtility.js";
 
 export const signup = async (req, res) => {
   const { firstname, lastname, email, password } = req.body;
@@ -136,4 +138,57 @@ export const checkAuth = (req, res) => {
     console.log("Error in checkAuth controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
+};
+
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  const otp = crypto.randomInt(100000, 999999).toString();
+  const expiry = Date.now() + 5 * 60 * 1000;
+
+  user.otp = otp;
+  user.otpExpiry = expiry;
+  await user.save();
+  
+  await sendEmail(email, "Your OTP Code", `Your OTP is ${otp}`);
+  return res.status(200).json({ message: "OTP sent to your email" });
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  if (!email || !otp || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Email, OTP, and new password are required" });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (!user.otp || !user.otpExpiry) {
+    return res.status(400).json({ message: "No OTP requested" });
+  }
+  if (user.otp !== otp) {
+    return res.status(400).json({ message: "Invalid OTP" });
+  }
+  if (Date.now() > user.otpExpiry) {
+    return res.status(400).json({ message: "OTP expired" });
+  }
+  if (newPassword.length < 8) {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 8 characters" });
+  }
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(newPassword, salt);
+  user.otp = "";
+  user.otpExpiry = null;
+  await user.save();
+  return res.status(200).json({ message: "Password reset successful" });
 };

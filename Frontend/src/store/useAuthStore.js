@@ -8,6 +8,7 @@ export const useAuthStore = create((set) => ({
   isLoggingIn: false,
   isCheckingAuth: true,
   isUpdatingProfile: false,
+  isSubmitting: false,
 
   checkAuth: async () => {
     try {
@@ -67,6 +68,30 @@ export const useAuthStore = create((set) => ({
       toast.error(error.response?.data?.message || "Profile update failed");
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  forgotPassword: async (email) => {
+    set({ isSubmitting: true });
+    try {
+      await axiosInstance.post("/auth/forgot-password", { email });
+      toast.success("OTP Sent");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send reset link");
+    } finally {
+      set({ isSubmitting: false });
+    }
+  },
+
+  resetPassword: async (data) => {
+    set({ isSubmitting: true });
+    try {
+      await axiosInstance.post("/auth/reset-password", data);
+      toast.success("Password reset successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Password reset failed");
+    } finally {
+      set({ isSubmitting: false });
     }
   },
 }));

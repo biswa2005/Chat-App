@@ -86,6 +86,11 @@ const Loginpage = () => {
                 </button>
               </div>
             </div>
+            <div className="flex justify-end mb-4">
+              <Link to="/forgot-password" className="text-md link link-primary">
+                Forgot password?
+              </Link>
+            </div>
 
             <button
               type="submit"
