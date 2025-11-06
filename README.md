@@ -28,7 +28,7 @@ Seamlessly connect, communicate, and collaborate.
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/Chat-App.git
+   git clone https://github.com/biswa2005/Chat-App.git
    cd Chat-App
    ```
 
